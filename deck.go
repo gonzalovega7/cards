@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
+	"os"
 	"strings"
+	"time"
 )
 
 // Create a new type of 'deck' which is a slice of strings
@@ -40,7 +43,33 @@ func (d deck) toString() string {
 	return strings.Join([]string(d), ", ")
 }
 
+// Saving our cards into a file
 func (d deck) saveToFile(filename string) error {
 	// Permission 0666 anyone can read and access to my file
 	return ioutil.WriteFile(filename, []byte(d.toString()), 0666)
+}
+
+// Reading the deck from a file
+func newDeckFromFile(filename string) deck {
+	byteSlice, err := ioutil.ReadFile(filename)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		os.Exit(1)
+	}
+
+	s := strings.Split(string(byteSlice), ", ")
+	return deck(s)
+}
+
+// Function use to shuffle the cards
+func (d deck) shuffle() {
+
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+
+	for i := range d {
+		newPosition := r.Intn(len(d) - 1)
+
+		d[i], d[newPosition] = d[newPosition], d[i]
+	}
 }
